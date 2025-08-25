@@ -28,10 +28,13 @@ public class CustomOrderProcessor extends UniversalProcessor {
         
         // 根据业务场景执行不同的定制逻辑
         String scenario = context.getScenario();
-        if ("order".equals(scenario)) {
-            enhancedOrderProcessing(context);
-        } else if ("medical".equals(scenario)) {
-            enterpriseMedicalProcessing(context);
+        switch (scenario) {
+            case "order" -> enhancedOrderProcessing(context);
+            case "medical" -> enterpriseMedicalProcessing(context);
+            case "finance" -> enterpriseFinanceProcessing(context);
+            case "procurement" -> enterpriseProcurementProcessing(context);
+            case "hr" -> enterpriseHRProcessing(context);
+            default -> defaultEnterpriseProcessing(context);
         }
     }
 
@@ -80,6 +83,65 @@ public class CustomOrderProcessor extends UniversalProcessor {
         context.setAttribute("audit.timestamp", String.valueOf(System.currentTimeMillis()));
         context.setAttribute("audit.operator", context.getOperatorId());
         context.setAttribute("audit.level", "ENTERPRISE");
+    }
+
+    private void enterpriseFinanceProcessing(BusinessContext context) {
+        System.out.printf("    💰 [企业财务] 多级财务审批 + 合规检查%n");
+        
+        Object amountObj = context.getData().get("amount");
+        if (amountObj instanceof Number) {
+            double amount = ((Number) amountObj).doubleValue();
+            if (amount > 50000) {
+                context.setAttribute("finance.approval.level", "CFO");
+                System.out.printf("      📊 大额支出 ¥%.2f 需要CFO审批%n", amount);
+            } else if (amount > 10000) {
+                context.setAttribute("finance.approval.level", "MANAGER");
+                System.out.printf("      📊 中额支出 ¥%.2f 需要部门经理审批%n", amount);
+            }
+        }
+        
+        context.setAttribute("finance.compliance", "ENTERPRISE_LEVEL");
+        System.out.printf("      📋 财务合规：企业级财务制度验证%n");
+    }
+
+    private void enterpriseProcurementProcessing(BusinessContext context) {
+        System.out.printf("    🏭 [企业采购] 供应商资质审核 + 多级采购审批%n");
+        
+        String vendorId = (String) context.getData().get("vendorId");
+        if (vendorId != null) {
+            context.setAttribute("vendor.verification", "REQUIRED");
+            context.setAttribute("vendor.level", "CERTIFIED_ENTERPRISE");
+            System.out.printf("      🏢 供应商 %s 企业资质验证中...%n", vendorId);
+        }
+        
+        Object costObj = context.getData().get("totalCost");
+        if (costObj instanceof Number) {
+            double cost = ((Number) costObj).doubleValue();
+            if (cost > 100000) {
+                context.setAttribute("procurement.approval", "BOARD_LEVEL");
+                System.out.printf("      💼 大额采购 ¥%.2f 需要董事会审批%n", cost);
+            }
+        }
+    }
+
+    private void enterpriseHRProcessing(BusinessContext context) {
+        System.out.printf("    👥 [企业HR] 多级人事审批 + 背景调查%n");
+        
+        String position = (String) context.getData().get("position");
+        if ("MANAGER".equals(position) || "SENIOR".equals(position)) {
+            context.setAttribute("background.check", "ENHANCED");
+            context.setAttribute("approval.level", "VP_HR");
+            System.out.printf("      🔍 高级职位 %s 需要增强背景调查%n", position);
+        }
+        
+        context.setAttribute("onboard.process", "ENTERPRISE_STANDARD");
+        System.out.printf("      📋 入职流程：企业标准化入职程序%n");
+    }
+
+    private void defaultEnterpriseProcessing(BusinessContext context) {
+        System.out.printf("    🏢 [企业通用] 标准企业级处理流程%n");
+        context.setAttribute("enterprise.standard", "APPLIED");
+        context.setAttribute("compliance.level", "ENTERPRISE");
     }
 
     private void sendEnterpriseNotification(BusinessContext context) {

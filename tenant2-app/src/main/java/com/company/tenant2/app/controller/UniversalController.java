@@ -90,6 +90,66 @@ public class UniversalController {
     }
 
     /**
+     * 仓储物流场景 - 智能库存优化
+     */
+    @PostMapping("/warehouse")
+    public UniversalProcessor.ProcessResult processWarehouse(@RequestBody Map<String, Object> warehouseData) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("scenario", "warehouse");
+        request.put("businessType", "INVENTORY_OPTIMIZE");
+        request.put("tenantId", "tenant2");
+        request.put("operatorId", warehouseData.getOrDefault("warehouseManagerId", "warehouse002"));
+        request.put("data", warehouseData);
+        
+        return processBusiness(request);
+    }
+
+    /**
+     * 客户服务场景 - AI智能客服
+     */
+    @PostMapping("/customer-service")
+    public UniversalProcessor.ProcessResult processCustomerService(@RequestBody Map<String, Object> serviceData) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("scenario", "customer-service");
+        request.put("businessType", "AI_SUPPORT");
+        request.put("tenantId", "tenant2");
+        request.put("operatorId", serviceData.getOrDefault("agentId", "agent002"));
+        request.put("data", serviceData);
+        
+        return processBusiness(request);
+    }
+
+    /**
+     * 营销活动场景 - 精准营销推荐
+     */
+    @PostMapping("/marketing")
+    public UniversalProcessor.ProcessResult processMarketing(@RequestBody Map<String, Object> marketingData) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("scenario", "marketing");
+        request.put("businessType", "PRECISION_CAMPAIGN");
+        request.put("tenantId", "tenant2");
+        request.put("operatorId", marketingData.getOrDefault("marketerId", "marketer002"));
+        request.put("data", marketingData);
+        
+        return processBusiness(request);
+    }
+
+    /**
+     * 质量管理场景 - 智能质检
+     */
+    @PostMapping("/quality")
+    public UniversalProcessor.ProcessResult processQuality(@RequestBody Map<String, Object> qualityData) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("scenario", "quality");
+        request.put("businessType", "INTELLIGENT_QC");
+        request.put("tenantId", "tenant2");
+        request.put("operatorId", qualityData.getOrDefault("qcManagerId", "qc002"));
+        request.put("data", qualityData);
+        
+        return processBusiness(request);
+    }
+
+    /**
      * 系统信息
      */
     @GetMapping("/info")
@@ -101,11 +161,15 @@ public class UniversalController {
         info.put("extensionMode", "事件驱动扩展模式");
         info.put("description", "展示灵活的智能增值服务");
         
-        info.put("supportedScenarios", Map.of(
-            "order", "智能订单处理",
-            "medical", "智能医疗管理",
-            "analytics", "智能数据分析"
-        ));
+        Map<String, String> scenarios = new HashMap<>();
+        scenarios.put("order", "智能订单处理 - 风控检测+快速通道");
+        scenarios.put("medical", "智能医疗管理 - AI诊断辅助");
+        scenarios.put("analytics", "智能数据分析 - 业务洞察+趋势预测");
+        scenarios.put("warehouse", "仓储物流 - 智能库存优化");
+        scenarios.put("customer-service", "客户服务 - AI智能客服");
+        scenarios.put("marketing", "营销活动 - 精准推荐引擎");
+        scenarios.put("quality", "质量管理 - 智能质检系统");
+        info.put("supportedScenarios", scenarios);
         
         info.put("professionalFeatures", Map.of(
             "intelligentValidation", "智能验证",
@@ -140,6 +204,10 @@ public class UniversalController {
             case "order" -> "T2-ORD";
             case "medical" -> "T2-MED";
             case "analytics" -> "T2-ANA";
+            case "warehouse" -> "T2-WHS";
+            case "customer-service" -> "T2-CS";
+            case "marketing" -> "T2-MKT";
+            case "quality" -> "T2-QC";
             default -> "T2-BIZ";
         };
         

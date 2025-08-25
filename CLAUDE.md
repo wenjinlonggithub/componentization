@@ -251,3 +251,347 @@ public ProcessResult processNewService(@RequestBody Map<String, Object> data) {
 **模块数量**：精简至5个核心模块，拒绝膨胀
 **扩展方式**：垂直扩展（模块内功能增强）而非水平扩展（新增模块）
 **学习目标**：降低学习成本，突出核心架构模式
+
+## 🔗 模块依赖关系
+
+### 依赖层次结构
+
+```
+🏗️  应用层 (Application Layer)
+┌─────────────────┬─────────────────┐
+│   tenant1-app   │   tenant2-app   │
+│   (企业版应用)   │   (专业版应用)   │
+└─────────┬───────┴─────────┬───────┘
+          │                 │
+          ▼                 ▼
+🔧  定制层 (Customization Layer)
+    ┌─────────────────┬─────────────────┐
+    │customization-   │customization-   │
+    │tenant1          │tenant2          │
+    │(继承扩展模式)    │(事件驱动模式)    │
+    └─────────┬───────┴─────────┬───────┘
+              │                 │
+              ▼                 ▼
+🎯  核心层 (Core Layer)
+        ┌─────────────────────┐
+        │    core-system      │
+        │   (框架+扩展点)      │
+        └─────────────────────┘
+```
+
+### 详细依赖关系
+
+#### 1. **core-system** (基础层 - 0依赖)
+```xml
+<dependencies>
+  <!-- 只依赖Spring Boot基础组件 -->
+  <dependency>spring-boot-starter</dependency>
+  <dependency>spring-boot-starter-web</dependency>
+  <dependency>spring-boot-autoconfigure</dependency>
+  <dependency>spring-context</dependency>
+</dependencies>
+```
+
+**职责**：
+- 提供核心业务抽象 (BusinessContext, UniversalProcessor)
+- 定义扩展点和钩子方法
+- 发布统一事件机制 (BusinessEvent)
+- 提供默认实现 (DefaultOrderProcessor)
+
+#### 2. **customization-tenant1** (定制层 - 依赖core)
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.company</groupId>
+    <artifactId>core-system</artifactId>  <!-- 依赖核心系统 -->
+  </dependency>
+</dependencies>
+```
+
+**职责**：
+- 继承 UniversalProcessor，覆盖钩子方法
+- 实现企业级深度定制逻辑
+- 提供条件化配置 (@ConditionalOnProperty)
+
+#### 3. **customization-tenant2** (定制层 - 依赖core)
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.company</groupId>
+    <artifactId>core-system</artifactId>  <!-- 依赖核心系统 -->
+  </dependency>
+</dependencies>
+```
+
+**职责**：
+- 监听 BusinessEvent，实现松耦合扩展
+- 提供专业版智能增值服务
+- 事件驱动的功能增强
+
+#### 4. **tenant1-app** (应用层 - 依赖core+tenant1定制)
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.company</groupId>
+    <artifactId>core-system</artifactId>         <!-- 核心能力 -->
+  </dependency>
+  <dependency>
+    <groupId>com.company</groupId>
+    <artifactId>customization-tenant1</artifactId> <!-- 租户1定制 -->
+  </dependency>
+</dependencies>
+```
+
+**职责**：
+- 提供完整的企业版应用
+- 暴露REST API接口
+- 集成核心系统+租户1定制化
+
+#### 5. **tenant2-app** (应用层 - 依赖core+tenant2定制)
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.company</groupId>
+    <artifactId>core-system</artifactId>         <!-- 核心能力 -->
+  </dependency>
+  <dependency>
+    <groupId>com.company</groupId>
+    <artifactId>customization-tenant2</artifactId> <!-- 租户2定制 -->
+  </dependency>
+</dependencies>
+```
+
+**职责**：
+- 提供完整的专业版应用  
+- 暴露REST API接口
+- 集成核心系统+租户2定制化
+
+### 依赖设计原则
+
+#### ✅ 良好的依赖设计
+1. **单向依赖**：依赖关系清晰，无循环依赖
+2. **分层依赖**：应用层 → 定制层 → 核心层
+3. **最小依赖**：每个模块只依赖必需的上游模块
+4. **职责分离**：每层有明确的职责边界
+
+#### ❌ 禁止的依赖关系
+- core-system **不能**依赖任何定制化模块
+- customization-tenant1 **不能**依赖 customization-tenant2
+- customization-tenant2 **不能**依赖 customization-tenant1  
+- tenant1-app **不能**依赖 tenant2相关模块
+- tenant2-app **不能**依赖 tenant1相关模块
+
+### 调用链路分析
+
+#### 租户1调用链 (继承扩展模式)
+```
+🌐 HTTP Request
+    ↓
+📱 UniversalController (tenant1-app)
+    ↓
+🔧 CustomOrderProcessor (customization-tenant1) 
+    ↓ [继承]
+🎯 UniversalProcessor (core-system)
+    ↓ [钩子调用]
+🔧 CustomOrderProcessor.beforeProcess() (定制逻辑)
+```
+
+#### 租户2调用链 (事件驱动模式)
+```
+🌐 HTTP Request  
+    ↓
+📱 UniversalController (tenant2-app)
+    ↓
+🎯 UniversalProcessor (core-system)
+    ↓ [发布事件]
+📡 BusinessEvent
+    ↓ [监听处理] 
+🔧 AdvancedOrderEventListener (customization-tenant2)
+```
+
+### 依赖检查工具
+
+#### Maven依赖树查看
+```bash
+# 查看tenant1-app完整依赖树
+cd tenant1-app && mvn dependency:tree
+
+# 查看tenant2-app完整依赖树  
+cd tenant2-app && mvn dependency:tree
+```
+
+#### 依赖验证清单
+在修改依赖前必须检查：
+- [ ] 是否引入循环依赖
+- [ ] 是否违反分层原则
+- [ ] 是否增加不必要的传递依赖
+- [ ] 是否破坏模块职责边界
+
+## 🎯 丰富业务案例展示
+
+### 业务场景全览
+
+#### 租户1企业版 - 深度定制业务场景
+```bash
+# 订单处理 - 企业级审批流程
+curl -X POST http://localhost:8081/api/business/order \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 15000, "itemCount": 5, "customerType": "enterprise"}'
+
+# 医疗管理 - 多级认证审批  
+curl -X POST http://localhost:8081/api/business/medical \
+  -H "Content-Type: application/json" \
+  -d '{"patientId": "P001", "treatment": "surgery", "doctorId": "Dr001"}'
+
+# 财务管理 - 企业级支出审计
+curl -X POST http://localhost:8081/api/business/finance \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 50000, "department": "R&D", "auditorId": "A001"}'
+
+# 采购管理 - 供应商资质审核
+curl -X POST http://localhost:8081/api/business/procurement \
+  -H "Content-Type: application/json" \
+  -d '{"vendorId": "V001", "totalCost": 120000, "category": "equipment"}'
+
+# 人力资源 - 员工入职审批
+curl -X POST http://localhost:8081/api/business/hr \
+  -H "Content-Type: application/json" \
+  -d '{"employeeId": "E001", "position": "MANAGER", "department": "Sales"}'
+```
+
+#### 租户2专业版 - 智能增值服务场景
+```bash
+# 智能订单 - 风控检测+快速通道
+curl -X POST http://localhost:8082/api/business/order \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 3000, "itemCount": 2, "userId": "U002"}'
+
+# 智能医疗 - AI诊断辅助
+curl -X POST http://localhost:8082/api/business/medical \
+  -H "Content-Type: application/json" \
+  -d '{"patientId": "P002", "symptoms": ["fever", "cough"], "doctorId": "Dr002"}'
+
+# 数据分析 - 智能洞察生成
+curl -X POST http://localhost:8082/api/business/analytics \
+  -H "Content-Type: application/json" \
+  -d '{"dataType": "sales", "period": "monthly", "analystId": "A002"}'
+
+# 仓储物流 - 智能库存优化
+curl -X POST http://localhost:8082/api/business/warehouse \
+  -H "Content-Type: application/json" \
+  -d '{"warehouseId": "WH001", "operation": "restock", "items": 100}'
+
+# 客户服务 - AI智能客服
+curl -X POST http://localhost:8082/api/business/customer-service \
+  -H "Content-Type: application/json" \
+  -d '{"customerId": "C002", "issue": "product_inquiry", "priority": "high"}'
+
+# 营销活动 - 精准推荐引擎
+curl -X POST http://localhost:8082/api/business/marketing \
+  -H "Content-Type: application/json" \
+  -d '{"customerId": "C002", "campaignType": "personalized", "channel": "email"}'
+
+# 质量管理 - 智能质检系统
+curl -X POST http://localhost:8082/api/business/quality \
+  -H "Content-Type: application/json" \
+  -d '{"productId": "PROD001", "batchId": "B20241225", "qcType": "automated"}'
+```
+
+### 详细调用流程展示
+
+#### 租户1调用流程 - 企业财务审批 (继承扩展模式)
+```
+🌐 HTTP POST /api/business/finance
+    ↓
+📱 UniversalController.processFinance() (tenant1-app)
+    ↓ [构建BusinessContext]
+🎯 BusinessContext{scenario='finance', businessType='EXPENSE_AUDIT'}
+    ↓ [调用处理器]
+🔧 CustomOrderProcessor.processBusiness() (customization-tenant1)
+    ↓ [继承覆盖]
+🎯 UniversalProcessor.processBusiness() (core-system)
+    ↓ [发布BEFORE_PROCESS事件]
+📡 BusinessEvent{phase='BEFORE_PROCESS', scenario='finance'}
+    ↓ [钩子方法调用]
+🔧 CustomOrderProcessor.beforeProcess() (定制逻辑)
+    ├─ enterpriseFinanceProcessing()
+    │   ├─ 💰 大额支出 ¥50000 需要CFO审批
+    │   └─ 📋 财务合规：企业级财务制度验证
+    ↓ [核心逻辑执行]
+🎯 UniversalProcessor.processCoreLogic()
+    ├─ 💼 财务业务处理
+    ├─ ✅ 状态更新：PROCESSED
+    ↓ [发布AFTER_PROCESS事件]
+📡 BusinessEvent{phase='AFTER_PROCESS', scenario='finance'}
+    ↓ [后置钩子调用]
+🔧 CustomOrderProcessor.afterProcess() (企业审计)
+    ├─ 📋 [企业审计] 完整操作轨迹记录
+    └─ 📬 [企业通知] 多渠道 + 实时推送
+✅ 返回ProcessResult{success=true, message='财务审批处理完成'}
+```
+
+#### 租户2调用流程 - 智能质检 (事件驱动模式)
+```
+🌐 HTTP POST /api/business/quality
+    ↓
+📱 UniversalController.processQuality() (tenant2-app)
+    ↓ [构建BusinessContext]
+🎯 BusinessContext{scenario='quality', businessType='INTELLIGENT_QC'}
+    ↓ [调用处理器]
+🎯 UniversalProcessor.processBusiness() (core-system)
+    ↓ [发布BEFORE_PROCESS事件]
+📡 BusinessEvent{phase='BEFORE_PROCESS', scenario='quality'}
+    ↓ [事件监听器处理]
+🔧 AdvancedOrderEventListener.handleBusinessEvent() (customization-tenant2)
+    ↓ [智能验证处理]
+    ├─ handleQualityValidation()
+    │   ├─ 🔍 [智能质检] 机器视觉 + 自动化检测
+    │   ├─ 🔬 缺陷检测精度: 99.5%+
+    │   ├─ setAttribute("computer.vision", "ENABLED")
+    │   └─ setAttribute("automated.inspection", "AI_POWERED")
+    ↓ [核心逻辑执行]
+🎯 UniversalProcessor.processCoreLogic()
+    ├─ 🔍 质量检测业务处理
+    ├─ ✅ 状态更新：PROCESSED
+    ↓ [发布AFTER_PROCESS事件]
+📡 BusinessEvent{phase='AFTER_PROCESS', scenario='quality'}
+    ↓ [增值服务处理]
+🔧 AdvancedOrderEventListener.handleAfterProcess()
+    ├─ 🎁 增值服务: quality专属功能
+    │   ├─ → 质量趋势分析
+    │   └─ → 预防性维护
+    ├─ 🔗 外部集成: ERP + CRM + 数据仓库
+    └─ 📊 业务洞察: 实时报表 + 趋势预测
+✅ 返回ProcessResult{success=true, message='智能质检处理完成'}
+```
+
+### 业务扩展能力对比
+
+| 业务场景 | 租户1企业版 (继承扩展) | 租户2专业版 (事件驱动) |
+|---------|---------------------|-------------------|
+| **订单处理** | 高额审批+风险控制+企业库存策略 | 智能风控+快速通道+推荐引擎 |
+| **医疗管理** | 多级认证+合规检查+医务科审批 | AI诊断辅助+药物检查+健康趋势 |
+| **财务管理** | 多级财务审批+合规验证 | - |
+| **采购管理** | 供应商资质审核+董事会审批 | - |
+| **人力资源** | 多级人事审批+背景调查 | - |
+| **数据分析** | - | 数据质量检查+ML模型验证 |
+| **仓储物流** | - | 智能调度+供应链可视化 |
+| **客户服务** | - | 情感分析+智能路由+满意度预测 |
+| **营销活动** | - | 用户画像+精准匹配+实时个性化 |
+| **质量管理** | - | 机器视觉+自动化检测+预防性维护 |
+
+### 架构价值体现
+
+#### 1. **场景覆盖全面**
+- **企业级场景**：订单、医疗、财务、采购、HR - 深度定制
+- **专业版场景**：订单、医疗、分析、仓储、客服、营销、质检 - 智能增值
+
+#### 2. **扩展模式清晰**
+- **继承扩展**：深度介入业务逻辑，完全控制处理流程
+- **事件驱动**：松耦合扩展，灵活增强功能
+
+#### 3. **调用逻辑完整**
+- **统一入口**：UniversalController 支持多业务场景
+- **统一上下文**：BusinessContext 承载所有业务数据
+- **统一处理**：UniversalProcessor 处理所有业务逻辑
+- **灵活扩展**：两种模式支撑不同定制需求

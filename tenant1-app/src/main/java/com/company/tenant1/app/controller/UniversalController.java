@@ -75,6 +75,51 @@ public class UniversalController {
     }
 
     /**
+     * 财务业务场景 - 企业级财务审计
+     */
+    @PostMapping("/finance")
+    public UniversalProcessor.ProcessResult processFinance(@RequestBody Map<String, Object> financeData) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("scenario", "finance");
+        request.put("businessType", "EXPENSE_AUDIT");
+        request.put("tenantId", "tenant1");
+        request.put("operatorId", financeData.getOrDefault("auditorId", "auditor001"));
+        request.put("data", financeData);
+        
+        return processBusiness(request);
+    }
+
+    /**
+     * 采购业务场景 - 企业级供应商管理
+     */
+    @PostMapping("/procurement")
+    public UniversalProcessor.ProcessResult processProcurement(@RequestBody Map<String, Object> procurementData) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("scenario", "procurement");
+        request.put("businessType", "VENDOR_APPROVAL");
+        request.put("tenantId", "tenant1");
+        request.put("operatorId", procurementData.getOrDefault("buyerId", "buyer001"));
+        request.put("data", procurementData);
+        
+        return processBusiness(request);
+    }
+
+    /**
+     * HR业务场景 - 企业级人力资源管理
+     */
+    @PostMapping("/hr")
+    public UniversalProcessor.ProcessResult processHR(@RequestBody Map<String, Object> hrData) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("scenario", "hr");
+        request.put("businessType", "EMPLOYEE_ONBOARD");
+        request.put("tenantId", "tenant1");
+        request.put("operatorId", hrData.getOrDefault("hrManagerId", "hr001"));
+        request.put("data", hrData);
+        
+        return processBusiness(request);
+    }
+
+    /**
      * 系统信息
      */
     @GetMapping("/info")
@@ -86,10 +131,13 @@ public class UniversalController {
         info.put("extensionMode", "继承扩展模式");
         info.put("description", "展示深度定制的企业级功能");
         
-        info.put("supportedScenarios", Map.of(
-            "order", "企业订单处理",
-            "medical", "企业医疗管理"
-        ));
+        Map<String, String> scenarios = new HashMap<>();
+        scenarios.put("order", "企业订单处理 - 高额订单审批流程");
+        scenarios.put("medical", "企业医疗管理 - 多级认证审批");
+        scenarios.put("finance", "财务管理 - 企业级支出审计");
+        scenarios.put("procurement", "采购管理 - 供应商资质审核");
+        scenarios.put("hr", "人力资源 - 员工入职审批");
+        info.put("supportedScenarios", scenarios);
         
         info.put("enterpriseFeatures", Map.of(
             "highValueAudit", "高额订单审批",
@@ -122,6 +170,9 @@ public class UniversalController {
         String prefix = switch (scenario.toLowerCase()) {
             case "order" -> "T1-ORD";
             case "medical" -> "T1-MED";
+            case "finance" -> "T1-FIN";
+            case "procurement" -> "T1-PRO";
+            case "hr" -> "T1-HRM";
             default -> "T1-BIZ";
         };
         
