@@ -17,6 +17,12 @@ cd tenant1-app && mvn spring-boot:run
 # 运行租户2应用（企业版 - 端口 8082）
 cd tenant2-app && mvn spring-boot:run
 
+# 运行EMR租户1应用（数据集存储 - 端口 8091）
+cd emr-tenant1-app && mvn spring-boot:run
+
+# 运行EMR租户2应用（数据库+HIS - 端口 8092）
+cd emr-tenant2-app && mvn spring-boot:run
+
 # 仅运行核心系统（端口 8080）
 cd core-system && mvn spring-boot:run
 ```
@@ -35,12 +41,17 @@ cd customization-tenant2 && mvn clean install
 
 这是一个**组件化架构**，演示了使用 Spring Boot 的多租户定制化模式。系统通过两种主要扩展方法支持标准化功能和租户特定定制。
 
+**项目包含两个业务场景**：
+1. **订单处理系统**：展示基础的组件化架构模式
+2. **EMR电子病历系统**：展示实际医疗场景中的组件化应用
+
 ### 多模块结构
 
-- **core-system**: 包含基础功能和扩展点（`OrderProcessor` 接口）
+- **core-system**: 包含基础功能和扩展点（`OrderProcessor`、`MedicalRecordProcessor` 接口）
 - **customization-tenant1**: 租户1定制化，使用继承+事件混合方法
 - **customization-tenant2**: 租户2定制化，使用纯事件驱动方法
-- **tenant1-app/tenant2-app**: 可部署应用，结合核心模块+租户特定模块
+- **tenant1-app/tenant2-app**: 订单处理系统的可部署应用
+- **emr-tenant1-app/emr-tenant2-app**: EMR电子病历系统的可部署应用
 
 ### 核心扩展模式
 

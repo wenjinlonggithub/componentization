@@ -1,0 +1,27 @@
+tenant:
+  id: tenant1
+  name: "EMR数据集存储租户"
+
+spring:
+  application:
+    name: emr-tenant1-application
+  profiles:
+    active: tenant1
+
+server:
+  port: 8091
+
+# 数据集相关配置
+dataset:
+  storage:
+    enabled: true
+    file-path: "medical_records_dataset.csv"
+    max-size: 10MB
+    backup-enabled: true
+
+logging:
+  level:
+    com.company: DEBUG
+    root: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [EMR-T1] %logger{36} - %msg%n"

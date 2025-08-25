@@ -13,6 +13,8 @@
         <module>core-system</module>
         <module>customization-tenant1</module>
         <module>customization-tenant2</module>
+        <module>emr-tenant1-app</module>
+        <module>emr-tenant2-app</module>
     </modules>
 
     <properties>

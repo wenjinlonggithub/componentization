@@ -1,0 +1,39 @@
+tenant:
+  id: tenant2
+  name: "EMR企业级租户"
+
+spring:
+  application:
+    name: emr-tenant2-application
+  profiles:
+    active: tenant2
+
+server:
+  port: 8092
+
+# 企业版特定配置
+enterprise:
+  database:
+    enabled: true
+    connection-pool-size: 20
+    max-connections: 100
+  his:
+    enabled: true
+    endpoint: "https://his.hospital.com/api"
+    timeout: 30000
+    retry-count: 3
+  workflow:
+    enabled: true
+    chronic-disease-management: true
+    infection-control: true
+  compliance:
+    data-validation: strict
+    privacy-check: enabled
+    audit-logging: enabled
+
+logging:
+  level:
+    com.company: DEBUG
+    root: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [EMR-T2] %logger{36} - %msg%n"
