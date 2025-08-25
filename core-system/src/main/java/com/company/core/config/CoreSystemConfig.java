@@ -1,25 +1,36 @@
 package com.company.core.config;
 
-import com.company.core.processor.DefaultOrderProcessor;
-import com.company.core.processor.DefaultMedicalRecordProcessor;
-import com.company.core.processor.MedicalRecordProcessor;
 import com.company.core.processor.OrderProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.company.core.processor.UniversalProcessor;
+import com.company.core.service.NotificationService;
+// NOTE: Spring imports commented out for standalone compilation
+// import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
 
-@Configuration
+/**
+ * Core System Configuration
+ * Provides default beans when no tenant-specific implementations are available
+ * NOTE: Spring annotations commented out for standalone compilation
+ */
+// @Configuration
 public class CoreSystemConfig {
-
-    @Bean
-    @ConditionalOnMissingBean(OrderProcessor.class)
-    public OrderProcessor defaultOrderProcessor() {
-        return new DefaultOrderProcessor();
+    
+    /**
+     * Default order processor when no tenant customization is available
+     */
+    // @Bean
+    // @ConditionalOnMissingBean(OrderProcessor.class)
+    public UniversalProcessor universalProcessor() {
+        return new UniversalProcessor();
     }
-
-    @Bean
-    @ConditionalOnMissingBean(MedicalRecordProcessor.class)
-    public MedicalRecordProcessor defaultMedicalRecordProcessor() {
-        return new DefaultMedicalRecordProcessor();
+    
+    /**
+     * Default notification service
+     */
+    // @Bean
+    // @ConditionalOnMissingBean(NotificationService.class)
+    public NotificationService notificationService() {
+        return new NotificationService();
     }
 }

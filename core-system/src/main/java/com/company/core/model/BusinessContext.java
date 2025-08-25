@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Universal Business Context - supports multiple business scenarios like order, medical, etc.
+ * Universal Business Context - supports multiple business scenarios
  */
 public class BusinessContext {
     

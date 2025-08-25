@@ -1,13 +1,22 @@
 package com.company.core.dto;
 
+/**
+ * Generic API Response wrapper
+ * Used for consistent REST API responses
+ */
 public class ApiResponse<T> {
+    
     private boolean success;
     private String message;
     private T data;
     private String errorCode;
 
-    // 构造函数
     public ApiResponse() {}
+
+    public ApiResponse(boolean success, String message) {
+        this.success = success;
+        this.message = message;
+    }
 
     public ApiResponse(boolean success, String message, T data) {
         this.success = success;
@@ -15,9 +24,9 @@ public class ApiResponse<T> {
         this.data = data;
     }
 
-    // 静态工厂方法
+    // Static factory methods
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(true, "操作成功", data);
+        return new ApiResponse<>(true, "Success", data);
     }
 
     public static <T> ApiResponse<T> success(String message, T data) {
@@ -25,11 +34,11 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> error(String message) {
-        return new ApiResponse<>(false, message, null);
+        return new ApiResponse<>(false, message);
     }
 
     public static <T> ApiResponse<T> error(String message, String errorCode) {
-        ApiResponse<T> response = new ApiResponse<>(false, message, null);
+        ApiResponse<T> response = new ApiResponse<>(false, message);
         response.setErrorCode(errorCode);
         return response;
     }
