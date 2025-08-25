@@ -1,17 +1,33 @@
 tenant:
   id: tenant1
-  name: "高级租户应用"
+  name: "租户1企业版"
+  type: "ENTERPRISE"
 
 spring:
   application:
-    name: tenant1-application
+    name: tenant1-enterprise-app
   profiles:
     active: tenant1
 
 server:
   port: 8081
 
+# 特性开关
+features:
+  universal-business: true    # 启用通用业务支持
+  traditional-order: true     # 保持传统订单兼容
+  enterprise-features: true   # 企业级功能
+
 logging:
   level:
-    com.company: DEBUG
+    com.company: INFO
     root: INFO
+  pattern:
+    console: "%d{HH:mm:ss} [租户1] %-5level %logger{20} - %msg%n"
+
+# 应用信息
+info:
+  tenant: "tenant1"
+  extension-mode: "继承扩展模式"
+  description: "展示企业级深度定制功能"
+  supported-scenarios: "order,medical"

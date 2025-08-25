@@ -4,7 +4,9 @@
       "Bash(mkdir:*)",
       "Bash(rm:*)",
       "Bash(find:*)",
-      "Bash(mvn clean compile:*)"
+      "Bash(mvn clean compile:*)",
+      "Bash(ls:*)",
+      "Bash(mvn:*)"
     ],
     "deny": []
   }

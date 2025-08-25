@@ -1,24 +1,43 @@
 tenant:
   id: tenant2
-  name: "企业租户应用"
+  name: "租户2专业版"
+  type: "PROFESSIONAL"
 
 spring:
   application:
-    name: tenant2-application
+    name: tenant2-professional-app
   profiles:
     active: tenant2
 
 server:
   port: 8082
 
-advanced:
+# 特性开关
+features:
+  universal-business: true      # 启用通用业务支持
+  traditional-order: true       # 保持传统订单兼容
+  professional-features: true   # 专业版功能
+
+# 专业版增强功能
+professional:
   features:
-    fraud-detection: true
-    erp-integration: true
-    advanced-analytics: true
-    complex-validation: true
+    fraud-detection: true       # 风控检测
+    erp-integration: true       # ERP集成
+    advanced-analytics: true    # 高级分析
+    intelligent-validation: true # 智能验证
+    fast-track: true           # 快速通道
+    value-added-services: true  # 增值服务
 
 logging:
   level:
-    com.company: DEBUG
+    com.company: INFO
     root: INFO
+  pattern:
+    console: "%d{HH:mm:ss} [租户2] %-5level %logger{20} - %msg%n"
+
+# 应用信息
+info:
+  tenant: "tenant2"
+  extension-mode: "事件驱动扩展模式"
+  description: "展示灵活的智能增值服务"
+  supported-scenarios: "order,medical,analytics"

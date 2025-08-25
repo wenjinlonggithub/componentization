@@ -1,15 +1,12 @@
 package com.company.core.event;
 
 import com.company.core.model.Order;
-import org.springframework.context.ApplicationEvent;
 
-public class AfterSaveEvent extends ApplicationEvent {
-    private final Order order;
-
+/**
+ * 保存后事件
+ */
+public class AfterSaveEvent extends OrderEvent {
     public AfterSaveEvent(Object source, Order order) {
-        super(source);
-        this.order = order;
+        super(source, order, "AFTER_SAVE");
     }
-
-    public Order getOrder() { return order; }
 }
