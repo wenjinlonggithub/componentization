@@ -1,6 +1,6 @@
 tenant:
   id: tenant2
-  name: "Enterprise Tenant Application"
+  name: "企业租户应用"
 
 spring:
   application:

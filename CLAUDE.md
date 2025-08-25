@@ -1,99 +1,99 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+此文件为 Claude Code (claude.ai/code) 在该代码仓库中工作时提供指导。
 
-## Build and Development Commands
+## 构建和开发命令
 
-### Build All Modules
+### 构建所有模块
 ```bash
 mvn clean install
 ```
 
-### Run Specific Tenant Applications
+### 运行特定租户应用
 ```bash
-# Run Tenant 1 Application (Premium - port 8081)
+# 运行租户1应用（高级版 - 端口 8081）
 cd tenant1-app && mvn spring-boot:run
 
-# Run Tenant 2 Application (Enterprise - port 8082)  
+# 运行租户2应用（企业版 - 端口 8082）
 cd tenant2-app && mvn spring-boot:run
 
-# Run Core System Only (port 8080)
+# 仅运行核心系统（端口 8080）
 cd core-system && mvn spring-boot:run
 ```
 
-### Build Individual Modules
+### 构建单个模块
 ```bash
-# Build core system
+# 构建核心系统
 cd core-system && mvn clean install
 
-# Build specific tenant customization
+# 构建特定租户定制化模块
 cd customization-tenant1 && mvn clean install
 cd customization-tenant2 && mvn clean install
 ```
 
-## Architecture Overview
+## 架构概览
 
-This is a **componentization architecture** demonstrating multi-tenant customization patterns using Spring Boot. The system supports both standardized functionality and tenant-specific customizations through two main extension approaches.
+这是一个**组件化架构**，演示了使用 Spring Boot 的多租户定制化模式。系统通过两种主要扩展方法支持标准化功能和租户特定定制。
 
-### Multi-Module Structure
+### 多模块结构
 
-- **core-system**: Contains base functionality with extension points (`OrderProcessor` interface)
-- **customization-tenant1**: Premium tenant customizations using inheritance + events hybrid approach
-- **customization-tenant2**: Enterprise tenant customizations using pure event-driven approach  
-- **tenant1-app/tenant2-app**: Deployable applications that combine core + tenant-specific modules
+- **core-system**: 包含基础功能和扩展点（`OrderProcessor` 接口）
+- **customization-tenant1**: 租户1定制化，使用继承+事件混合方法
+- **customization-tenant2**: 租户2定制化，使用纯事件驱动方法
+- **tenant1-app/tenant2-app**: 可部署应用，结合核心模块+租户特定模块
 
-### Key Extension Patterns
+### 核心扩展模式
 
-#### 1. Hook Methods (Template Method Pattern)
-The `DefaultOrderProcessor` class defines the main processing flow with overridable hook methods:
-- `beforeSave(Order order)` - Hook for pre-save customizations
-- `beforeNotify(Order order)` - Hook for pre-notification customizations
+#### 1. 钩子方法（模板方法模式）
+`DefaultOrderProcessor` 类定义主要处理流程，包含可覆盖的钩子方法：
+- `beforeSave(Order order)` - 保存前定制化钩子
+- `beforeNotify(Order order)` - 通知前定制化钩子
 
-Tenant customizations can extend `DefaultOrderProcessor` and override these hooks.
+租户定制化可以继承 `DefaultOrderProcessor` 并覆盖这些钩子。
 
-#### 2. Event-Driven Extensions  
-The core system publishes Spring events at key processing points:
-- `BeforeSaveEvent` - Published before saving orders
-- `AfterSaveEvent` - Published after successful save
-- `BeforeNotifyEvent` - Published before user notification
+#### 2. 事件驱动扩展
+核心系统在关键处理点发布 Spring 事件：
+- `BeforeSaveEvent` - 保存订单前发布
+- `AfterSaveEvent` - 成功保存后发布
+- `BeforeNotifyEvent` - 用户通知前发布
 
-Events support conditional execution via `skipDefaultAction()` mechanism.
+事件支持通过 `skipDefaultAction()` 机制进行条件执行。
 
-#### 3. Conditional Configuration
-Tenant modules are activated using `@ConditionalOnProperty`:
+#### 3. 条件化配置
+租户模块通过 `@ConditionalOnProperty` 激活：
 ```java
 @ConditionalOnProperty(name = "tenant.id", havingValue = "tenant1")
 ```
 
-### Tenant Customization Examples
+### 租户定制化示例
 
-**Tenant 1 (Premium)** - Uses inheritance + events:
-- `CustomOrderProcessor extends DefaultOrderProcessor` - Overrides hooks for high-value order auditing and SMS notifications
-- `OrderEventListener` - Handles additional business logic via event listeners
+**租户1（高级版）** - 使用继承+事件混合方式：
+- `CustomOrderProcessor extends DefaultOrderProcessor` - 覆盖钩子实现高额订单审核和短信通知
+- `OrderEventListener` - 通过事件监听器处理额外业务逻辑
 
-**Tenant 2 (Enterprise)** - Uses pure event-driven:
-- `AdvancedOrderEventListener` - Implements complex validation, ERP integration, and multi-channel notifications entirely through event handling
+**租户2（企业版）** - 使用纯事件驱动方式：
+- `AdvancedOrderEventListener` - 完全通过事件处理实现复杂验证、ERP集成和多渠道通知
 
-### Configuration Management
+### 配置管理
 
-Each tenant application uses `tenant.id` property to activate specific customizations:
-- `tenant.id=tenant1` activates Tenant1Config and related beans
-- `tenant.id=tenant2` activates Tenant2Config and related beans
+每个租户应用使用 `tenant.id` 属性激活特定定制化：
+- `tenant.id=tenant1` 激活 Tenant1Config 和相关bean
+- `tenant.id=tenant2` 激活 Tenant2Config 和相关bean
 
-The core system uses `@ConditionalOnMissingBean(OrderProcessor.class)` to provide default implementation when no tenant-specific processor is available.
+核心系统使用 `@ConditionalOnMissingBean(OrderProcessor.class)` 在没有租户特定处理器时提供默认实现。
 
-### Development Workflow
+### 开发工作流程
 
-When adding new tenant customizations:
-1. Create new customization module following existing patterns
-2. Choose extension approach: inheritance (direct hook overrides) or event-driven (loose coupling)
-3. Add conditional configuration with unique `tenant.id` value  
-4. Create deployable application module that includes core + customization dependencies
-5. Configure application.yml with appropriate tenant.id and other tenant-specific properties
+添加新租户定制化时：
+1. 按照现有模式创建新的定制化模块
+2. 选择扩展方法：继承（直接钩子覆盖）或事件驱动（松耦合）
+3. 添加带有唯一 `tenant.id` 值的条件化配置
+4. 创建包含核心+定制化依赖的可部署应用模块
+5. 在 application.yml 中配置适当的 tenant.id 和其他租户特定属性
 
-### Important Implementation Details
+### 重要实现细节
 
-- Events are published synchronously and support conditional skipping of default behavior
-- The `@Order` annotation controls event listener execution sequence
-- Tenant modules depend only on core-system, avoiding cross-tenant dependencies
-- Each deployable application runs on different ports (8081, 8082) for independent deployment
+- 事件同步发布，支持条件跳过默认行为
+- `@Order` 注解控制事件监听器执行顺序
+- 租户模块仅依赖 core-system，避免跨租户依赖
+- 每个可部署应用运行在不同端口（8081、8082）以支持独立部署

@@ -1,12 +1,12 @@
 tenant:
   id: tenant2
-  name: "Enterprise Tenant"
+  name: "企业租户"
 
 spring:
   application:
     name: tenant2-app
 
-# Enterprise-specific configurations
+# 企业版特定配置
 advanced:
   features:
     fraud-detection: true

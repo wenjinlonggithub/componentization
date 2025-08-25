@@ -1,143 +1,143 @@
-# Componentization Solution - Complete End-to-End Implementation
+# 组件化解决方案 - 完整端到端实现
 
-This project demonstrates a complete **componentization architecture** that supports both standardized functionality and tenant-specific customizations using Spring Boot.
+本项目展示了一个完整的**组件化架构**，支持标准化功能和租户特定定制化，使用 Spring Boot 技术栈。
 
-## Architecture Overview
+## 架构概览
 
-### Multi-Repository Structure
-- **core-system**: Base functionality with extension points and hooks
-- **customization-tenant1**: Premium tenant customizations (inheritance + events)
-- **customization-tenant2**: Enterprise tenant customizations (event-driven only)
-- **tenant1-app**: Deployable application for Tenant 1
-- **tenant2-app**: Deployable application for Tenant 2
+### 多仓库结构
+- **core-system**: 核心功能模块，包含扩展点和钩子方法
+- **customization-tenant1**: 租户1定制化模块（继承+事件混合模式）
+- **customization-tenant2**: 租户2定制化模块（纯事件驱动模式）
+- **tenant1-app**: 租户1可部署应用
+- **tenant2-app**: 租户2可部署应用
 
-### Key Design Patterns Implemented
+### 核心设计模式
 
-1. **Extension Points**: Interface-based extension points (`OrderProcessor`)
-2. **Hook Methods**: Template method pattern with overridable hooks
-3. **Event-Driven Architecture**: Spring events for loose coupling
-4. **Conditional Configuration**: Spring Boot conditional beans
-5. **Plugin Architecture**: Modular customizations
+1. **扩展点模式**: 基于接口的扩展点（`OrderProcessor`）
+2. **钩子方法**: 模板方法模式，支持可覆盖的钩子
+3. **事件驱动架构**: Spring 事件机制实现松耦合
+4. **条件化配置**: Spring Boot 条件化Bean配置
+5. **插件化架构**: 模块化定制功能
 
-## Project Structure
+## 项目结构
 
 ```
 componentization/
-├── core-system/                    # Core functionality
+├── core-system/                    # 核心功能模块
 │   ├── src/main/java/com/company/core/
-│   │   ├── model/                  # Domain models (Order, User)
-│   │   ├── processor/              # Core processing logic
-│   │   ├── event/                  # Spring events
-│   │   ├── service/                # Core services
-│   │   └── config/                 # Configuration
+│   │   ├── model/                  # 领域模型 (Order, User)
+│   │   ├── processor/              # 核心处理逻辑
+│   │   ├── event/                  # Spring 事件
+│   │   ├── service/                # 核心服务
+│   │   └── config/                 # 配置类
 │   └── pom.xml
-├── customization-tenant1/          # Premium tenant customizations
+├── customization-tenant1/          # 租户1定制化模块（高级版）
 │   ├── src/main/java/com/company/tenant1/
-│   │   ├── processor/              # Custom processor (inheritance)
-│   │   ├── listener/               # Event listeners
-│   │   └── config/                 # Tenant config
+│   │   ├── processor/              # 自定义处理器（继承模式）
+│   │   ├── listener/               # 事件监听器
+│   │   └── config/                 # 租户配置
 │   └── pom.xml
-├── customization-tenant2/          # Enterprise tenant customizations
+├── customization-tenant2/          # 租户2定制化模块（企业版）
 │   ├── src/main/java/com/company/tenant2/
-│   │   ├── listener/               # Advanced event listeners
-│   │   └── config/                 # Enterprise config
+│   │   ├── listener/               # 高级事件监听器
+│   │   └── config/                 # 企业版配置
 │   └── pom.xml
-├── tenant1-app/                    # Tenant 1 application
+├── tenant1-app/                    # 租户1应用程序
 │   └── src/main/java/com/company/tenant1/app/
-├── tenant2-app/                    # Tenant 2 application
+├── tenant2-app/                    # 租户2应用程序
 │   └── src/main/java/com/company/tenant2/app/
-└── pom.xml                         # Parent POM
+└── pom.xml                         # 父级 POM 配置
 ```
 
-## Core System Features
+## 核心系统特性
 
-### 1. Extension Points
+### 1. 扩展点设计
 ```java
-// Core interface for customization
+// 定制化核心接口
 public interface OrderProcessor {
     void process(Order order);
 }
 ```
 
-### 2. Hook Methods
+### 2. 钩子方法
 ```java
-// Template method with hooks
+// 包含钩子的模板方法
 public class DefaultOrderProcessor implements OrderProcessor {
     @Override
     public void process(Order order) {
         validate(order);
         calculatePrice(order);
-        beforeSave(order);        // Hook
+        beforeSave(order);        // 钩子方法
         save(order);
-        beforeNotify(order);      // Hook
+        beforeNotify(order);      // 钩子方法
         notifyUser(order);
     }
     
-    protected void beforeSave(Order order) {} // Override in customizations
-    protected void beforeNotify(Order order) {} // Override in customizations
+    protected void beforeSave(Order order) {} // 定制化模块可覆盖
+    protected void beforeNotify(Order order) {} // 定制化模块可覆盖
 }
 ```
 
-### 3. Event-Driven Architecture
+### 3. 事件驱动架构
 ```java
-// Events for loose coupling
+// 松耦合事件机制
 public class BeforeSaveEvent extends ApplicationEvent {
     private boolean skipDefaultAction = false;
-    // ... event methods
+    // ... 事件相关方法
 }
 ```
 
-## Customization Examples
+## 定制化实现示例
 
-### Tenant 1 (Premium) - Inheritance + Events
-- **Custom Processor**: Extends `DefaultOrderProcessor`
-- **Audit Logic**: High-value orders require approval
-- **SMS Notifications**: Uses SMS instead of email
-- **Event Listeners**: Additional inventory management
+### 租户1（高级版） - 继承+事件混合模式
+- **自定义处理器**: 继承 `DefaultOrderProcessor`
+- **审核逻辑**: 高额订单需要主管审核
+- **短信通知**: 使用短信替代邮件通知
+- **事件监听**: 额外的库存管理逻辑
 
-### Tenant 2 (Enterprise) - Event-Driven Only
-- **Complex Validation**: Fraud detection for large orders
-- **ERP Integration**: External system integration
-- **Multi-channel Notifications**: Email + SMS + Push + Dashboard
-- **Advanced Analytics**: Report generation
+### 租户2（企业版） - 纯事件驱动模式
+- **复杂验证**: 大额订单的欺诈检测
+- **ERP集成**: 外部系统集成
+- **多渠道通知**: 邮件+短信+推送+仪表板
+- **高级分析**: 报表生成
 
-## Build and Run
+## 构建和运行
 
-### 1. Build All Modules
+### 1. 构建所有模块
 ```bash
 mvn clean install
 ```
 
-### 2. Run Tenant 1 Application
+### 2. 运行租户1应用
 ```bash
 cd tenant1-app
 mvn spring-boot:run
 ```
 
-### 3. Run Tenant 2 Application
+### 3. 运行租户2应用
 ```bash
 cd tenant2-app
 mvn spring-boot:run
 ```
 
-## Configuration Management
+## 配置管理
 
-### Tenant Selection
-Each application uses `tenant.id` property to activate specific customizations:
+### 租户选择
+每个应用使用 `tenant.id` 属性来激活特定的定制化功能：
 
 ```yaml
-# Tenant 1
+# 租户1
 tenant:
   id: tenant1
-  name: "Premium Tenant"
+  name: "高级租户"
 
-# Tenant 2  
+# 租户2
 tenant:
   id: tenant2
-  name: "Enterprise Tenant"
+  name: "企业租户"
 ```
 
-### Conditional Configuration
+### 条件化配置
 ```java
 @Configuration
 @ConditionalOnProperty(name = "tenant.id", havingValue = "tenant1")
@@ -146,37 +146,37 @@ public class Tenant1Config {
 }
 ```
 
-## Key Benefits
+## 核心优势
 
-1. **Separation of Concerns**: Core logic separated from customizations
-2. **Independent Development**: Teams can work on customizations independently
-3. **Flexible Deployment**: Different combinations of modules per tenant
-4. **Maintainability**: Core updates don't affect customizations
-5. **Scalability**: Easy to add new tenants and customizations
+1. **关注点分离**: 核心逻辑与定制逻辑完全分离
+2. **独立开发**: 团队可以独立开发定制化功能
+3. **灵活部署**: 每个租户可以使用不同的模块组合
+4. **易于维护**: 核心系统更新不影响定制化模块
+5. **可扩展性**: 容易添加新租户和新的定制化功能
 
-## Extension Approaches
+## 扩展方法
 
-### 1. Inheritance (Tenant 1)
-- Extend `DefaultOrderProcessor`
-- Override hook methods
-- Direct customization of processing logic
+### 1. 继承模式（租户1）
+- 继承 `DefaultOrderProcessor`
+- 覆盖钩子方法
+- 直接定制处理逻辑
 
-### 2. Event-Driven (Tenant 2)
-- Listen to Spring events
-- Loose coupling
-- Can skip default actions
-- Better for complex integrations
+### 2. 事件驱动（租户2）
+- 监听 Spring 事件
+- 松耦合设计
+- 可跳过默认行为
+- 更适合复杂集成场景
 
-## Demo Scenarios
+## 演示场景
 
-### Tenant 1 Demo
-- Regular order processing with SMS notifications
-- High-value order requiring manager approval
-- Custom inventory updates via events
+### 租户1演示
+- 常规订单处理，使用短信通知
+- 高额订单需要主管审核
+- 通过事件进行自定义库存更新
 
-### Tenant 2 Demo  
-- Small order with standard processing
-- Large order triggering complex validation, ERP integration, and advanced notifications
-- Multi-channel notification system
+### 租户2演示
+- 小额订单的标准处理流程
+- 大额订单触发复杂验证、ERP集成和高级通知
+- 多渠道通知系统
 
-This architecture provides a robust foundation for supporting both standardized products and tenant-specific customizations while maintaining clean separation and extensibility.
+该架构为支持标准化产品和租户特定定制化提供了稳健的基础，同时保持了清晰的分离和可扩展性。

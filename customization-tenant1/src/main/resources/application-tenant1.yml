@@ -1,6 +1,6 @@
 tenant:
   id: tenant1
-  name: "Premium Tenant"
+  name: "高级租户"
 
 spring:
   application:
