@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="customization-tenant1" />
+        <module name="customization-tenant2" />
+        <module name="core-system" />
+        <module name="emr-tenant2-app" />
+        <module name="emr-tenant1-app" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>
