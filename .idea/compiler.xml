@@ -6,12 +6,25 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="tenant1-app" />
         <module name="customization-tenant1" />
         <module name="customization-tenant2" />
         <module name="core-system" />
-        <module name="emr-tenant2-app" />
-        <module name="emr-tenant1-app" />
+        <module name="tenant2-app" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="clinic-app" target="17" />
+      <module name="emr-tenant1-app" target="17" />
+      <module name="emr-tenant2-app" target="17" />
+      <module name="extension-examples" target="17" />
+      <module name="hospital-app" target="17" />
+      <module name="medical-clinic" target="17" />
+      <module name="medical-core" target="17" />
+      <module name="medical-hospital" target="17" />
+      <module name="medical-plugins" target="17" />
+      <module name="universal-app" target="17" />
+      <module name="universal-core" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>
