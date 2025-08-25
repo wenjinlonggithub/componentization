@@ -5,18 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 通用业务上下文 - 支持订单、医疗等多种业务场景
+ * Universal Business Context - supports multiple business scenarios like order, medical, etc.
  */
 public class BusinessContext {
     
     private String businessId;
-    private String scenario;           // 业务场景: order, medical 等
-    private String businessType;       // 业务类型: ORDER_PROCESS, PRESCRIPTION 等
+    private String scenario;           // Business scenario: order, medical, etc
+    private String businessType;       // Business type: ORDER_PROCESS, PRESCRIPTION, etc
     private String tenantId;
     private String operatorId;
     private LocalDateTime timestamp;
     
-    // 通用业务数据容器
+    // Universal business data container
     private Map<String, Object> data = new HashMap<>();
     private Map<String, String> attributes = new HashMap<>();
     private String status = "CREATED";
@@ -31,7 +31,7 @@ public class BusinessContext {
         this.businessType = businessType;
     }
 
-    // 便捷方法
+    // Convenience methods
     public void putData(String key, Object value) {
         this.data.put(key, value);
     }

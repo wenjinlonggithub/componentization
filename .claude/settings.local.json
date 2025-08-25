@@ -6,7 +6,8 @@
       "Bash(find:*)",
       "Bash(mvn clean compile:*)",
       "Bash(ls:*)",
-      "Bash(mvn:*)"
+      "Bash(mvn:*)",
+      "Bash(javac:*)"
     ],
     "deny": []
   }
