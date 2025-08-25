@@ -1,0 +1,11 @@
+tenant:
+  id: tenant1
+  name: "Premium Tenant"
+
+spring:
+  application:
+    name: tenant1-app
+
+logging:
+  level:
+    com.company.tenant1: DEBUG

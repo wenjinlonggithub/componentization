@@ -1,0 +1,17 @@
+tenant:
+  id: tenant1
+  name: "Premium Tenant Application"
+
+spring:
+  application:
+    name: tenant1-application
+  profiles:
+    active: tenant1
+
+server:
+  port: 8081
+
+logging:
+  level:
+    com.company: DEBUG
+    root: INFO

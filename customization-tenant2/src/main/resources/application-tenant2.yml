@@ -1,0 +1,18 @@
+tenant:
+  id: tenant2
+  name: "Enterprise Tenant"
+
+spring:
+  application:
+    name: tenant2-app
+
+# Enterprise-specific configurations
+advanced:
+  features:
+    fraud-detection: true
+    erp-integration: true
+    advanced-analytics: true
+
+logging:
+  level:
+    com.company.tenant2: DEBUG

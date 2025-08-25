@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: core-system
+  profiles:
+    active: default
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.company.core: INFO

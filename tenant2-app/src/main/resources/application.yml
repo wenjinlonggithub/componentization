@@ -1,0 +1,24 @@
+tenant:
+  id: tenant2
+  name: "Enterprise Tenant Application"
+
+spring:
+  application:
+    name: tenant2-application
+  profiles:
+    active: tenant2
+
+server:
+  port: 8082
+
+advanced:
+  features:
+    fraud-detection: true
+    erp-integration: true
+    advanced-analytics: true
+    complex-validation: true
+
+logging:
+  level:
+    com.company: DEBUG
+    root: INFO
